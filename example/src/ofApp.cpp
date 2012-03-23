@@ -108,7 +108,7 @@ void ofApp::setup() {
     ofSetVerticalSync(true);
     pastImg.loadImage("1.png"); //this means we'll always have to have one image to start!
     mesh.setMode(OF_PRIMITIVE_TRIANGLES); //rather than points
-    skip = 3;	
+    skip = 2;	
 	width = pastImg.getWidth();
 	height = pastImg.getHeight();
 	ofVec3f zero(0, 0, 0);
@@ -133,7 +133,11 @@ void ofApp::update() {
     
     currentTime = ofGetElapsedTimeMillis();
     
-    printf("currentTime is: %d,  lastTime is: %d\n", currentTime, lastTime);
+//    printf("currentTime is: %d,  lastTime is: %d\n", currentTime, lastTime);
+    printf("frameToShow: %d   mostRecentFrame: %d  timeOffsetFrames: %d\n ", frameToShow, mostRecentFrame, timeOffsetFrames);
+
+
+   
     
     
     //---------RECORDING the present-----------
@@ -187,7 +191,7 @@ void ofApp::update() {
     
     //---------SHOWING the present or past-----------
     
-    frameToShow = mostRecentFrame - timeOffsetFrames + 1;
+    frameToShow = mostRecentFrame - timeOffsetFrames;
     ostringstream fileNameToLoad;     
     fileNameToLoad << frameToShow << ".png";     
     frameResult = fileNameToLoad.str(); 
@@ -226,28 +230,32 @@ void ofApp::update() {
         }
     }    
     
+    if(ofGetKeyPressed('i')){
+        timeOffsetFrames = 0;
+    }
     
+    if(ofGetKeyPressed('u')){
+        timeOffsetFrames = numberOfFramesRecorded;
+    }
     
     if (ofGetKeyPressed('p') || ofGetKeyPressed('o')){
         printf("we are viewing frame number: %d\n", timeOffsetFrames);
         if(ofGetKeyPressed('p')){
-            if(timeOffsetFrames < numberOfFramesRecorded-1){
+            if(timeOffsetFrames+1 > mostRecentFrame){
                 timeOffsetFrames = numberOfFramesRecorded;
             }else{
                 timeOffsetFrames++;
             }
         }
         if(ofGetKeyPressed('o')){
-            if (timeOffsetFrames > 1){
+            if (timeOffsetFrames > 0){
                 timeOffsetFrames--;
             }else{
-                timeOffsetFrames = 1;
+                timeOffsetFrames = 0;
             }
         }
         
-        if(ofGetKeyPressed('i')){
-            timeOffsetFrames = 0;
-        }
+    
     }    
 }   
 
@@ -258,7 +266,7 @@ void ofApp::draw() {
 	ofBackground(0);
     
     cam.begin();
-    ofScale(1, -1, 1); // "make y point down" I still don't understand what this means
+    ofScale(-1, -1, 1); // "make y point down" I still don't understand what this means
     pastImg.bind();
     mesh.draw();  //
     pastImg.unbind();
@@ -282,7 +290,7 @@ void ofApp::exit() {
 bool ofApp::recordReady() {
     if (recordingOn == true){
         if (kinect.isFrameNew()) { 
-            if(currentTime > lastTime + recordInterval) {
+//            if(currentTime > lastTime + recordInterval) {
                 lastTime = currentTime;
                 if (mostRecentFrame < numberOfFramesToRecord){
                     mostRecentFrame = mostRecentFrame + 1;
@@ -290,7 +298,7 @@ bool ofApp::recordReady() {
                     return true;
                     
                 }
-            }
+//            }
         }
     }else{
         return false;
